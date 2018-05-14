@@ -48,22 +48,33 @@ endif
 "}}}
 "{{{ Functions
 
+function! MatchSection(sectiontype)
+  return '\('
+        \ . '^\s*\\' . a:sectiontype .
+        \ '\|' .  '^\s*%\s*Fake' . a:sectiontype . '\)'
+endfunction
+
+
 function! TeXFold(lnum)
     let line = getline(a:lnum)
     let default_envs = g:tex_fold_use_default_envs?
         \['frame', 'table', 'figure', 'align', 'lstlisting']: []
     let envs = '\(' . join(default_envs + g:tex_fold_additional_envs, '\|') . '\)'
 
-    if line =~ '^\s*\\section'
+    if line =~ MatchSection('chapter')
         return '>1'
     endif
 
-    if line =~ '^\s*\\subsection'
+    if line =~ MatchSection('section')
         return '>2'
     endif
 
-    if line =~ '^\s*\\subsubsection'
+    if line =~ MatchSection('subsection')
         return '>3'
+    endif
+
+    if line =~ MatchSection('subsubsection')
+        return '>4'
     endif
 
     if !g:tex_fold_ignore_envs
@@ -92,9 +103,14 @@ endfunction
 function! TeXFoldText()
     let fold_line = getline(v:foldstart)
 
-    if fold_line =~ '^\s*\\\(sub\)*section'
-        let pattern = '\\\(sub\)*section{\([^}]*\)}'
-        let repl = ' ' . g:tex_fold_sec_char . ' \2'
+    let sectionregex = '\(\(sub\)*section\|chapter\)'
+
+    if fold_line =~ '^\s*\\' . sectionregex
+        let pattern = '\\' . sectionregex . '{\([^}]*\)}'
+        let repl = ' ' . g:tex_fold_sec_char . ' \3'
+    elseif fold_line =~ '^\s*%\s*Fake' . sectionregex
+        let pattern = '^\s*%\s*Fake' . sectionregex . ':\{,1}\s*\(.*\)'
+        let repl = ' ' . g:tex_fold_sec_char . ' \3'
     elseif fold_line =~ '^\s*\\begin'
         let pattern = '\\begin{\([^}]*\)}'
         let repl = ' ' . g:tex_fold_env_char . ' \1'
