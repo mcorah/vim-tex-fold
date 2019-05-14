@@ -103,7 +103,8 @@ endfunction
 function! TeXFoldText()
     let fold_line = getline(v:foldstart)
 
-    let sectionregex = '\(\(sub\)*section\|chapter\)'
+    " section and chapter may and may not have stars
+    let sectionregex = '\(\(sub\)*section\|chapter\)\*\='
 
     if fold_line =~ '^\s*\\' . sectionregex
         let pattern = '\\' . sectionregex . '{\([^}]*\)}'
