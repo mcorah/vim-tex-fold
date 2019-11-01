@@ -54,6 +54,14 @@ function! MatchSection(sectiontype)
         \ '\|' .  '^\s*%\s*Fake' . a:sectiontype . '\)'
 endfunction
 
+function! MightBeSection()
+  return '\('
+        \ . 'chapter'
+        \ . '\|section'
+        \ . '\|subsection'
+        \ . '\|subsubsection'
+        \ . '\)'
+endfunction
 
 function! TeXFold(lnum)
     let line = getline(a:lnum)
@@ -61,20 +69,22 @@ function! TeXFold(lnum)
         \['frame', 'table', 'figure', 'align', 'lstlisting']: []
     let envs = '\(' . join(default_envs + g:tex_fold_additional_envs, '\|') . '\)'
 
-    if line =~ MatchSection('chapter')
-        return '>1'
-    endif
+    if line =~ MightBeSection()
+      if line =~ MatchSection('chapter')
+          return '>1'
+      endif
 
-    if line =~ MatchSection('section')
-        return '>2'
-    endif
+      if line =~ MatchSection('section')
+          return '>2'
+      endif
 
-    if line =~ MatchSection('subsection')
-        return '>3'
-    endif
+      if line =~ MatchSection('subsection')
+          return '>3'
+      endif
 
-    if line =~ MatchSection('subsubsection')
-        return '>4'
+      if line =~ MatchSection('subsubsection')
+          return '>4'
+      endif
     endif
 
     if !g:tex_fold_ignore_envs
